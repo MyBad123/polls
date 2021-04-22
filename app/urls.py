@@ -11,5 +11,6 @@ urlpatterns = [
     path('options-put/', WorkOptions.as_view({"put": "put_option"})),
     #work with user
     path('post-option/', UserOption.as_view({"post": "post_option"})),
+    path('post-useroption/', UserOption.as_view({"post": "post_users_option"})),
 ]
 

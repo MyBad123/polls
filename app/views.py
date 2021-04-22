@@ -115,8 +115,37 @@ class UserOption(ViewSet):
             if i.user_option_options.option_poll.id in arr_id_polls:
                 arr_id_polls.remove(i.user_option_options.option_poll.id)
 
-        
-        return Response(data={"data": arr_id_polls}, status=status.HTTP_200_OK)
+        information_polls = []
+        for i in arr_id_polls:
+            a_a = Poll.objects.get(id=i)
+            a_b = Options.objects.filter(option_poll=a_a)
+            arr_option = []
+            for j in a_b:
+                arr_option.append({"id": j.id, "option": j.option_options})
+            information_polls.append({
+                "id": a_a.id,
+                "poll_name": a_a.poll_name, 
+                "poll_desc": a_a.poll_desc, 
+                "poll_start": a_a.poll_start, 
+                "poll_finish": a_a.poll_finish, 
+                "poll_type": a_a.poll_type, 
+                "options": arr_option
+            })
+        return Response(data={"data": information_polls}, status=status.HTTP_200_OK)
+
+    def post_users_option(self, request):
+        try:
+            poll = Poll.objects.get(id=request.data.get('poll_id'))
+            
+            if (datetime.datetime.now().date() < poll.poll_start.date()) and (datetime.datetime.now().date() > poll.poll_finish.date()):
+                return Response(status=status.HTTP_204_NO_CONTENT) 
+            elif ((datetime.datetime.now().date() == poll.poll_start.date()) and (datetime.datetime.now().time() < poll.poll_start.time())) \
+                    and (datetime.datetime.now().date() == poll.poll_finish.date()) and (datetime.datetime.now().time() > poll.poll_finish.time()):
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class UsersWOrk(ViewSet):
